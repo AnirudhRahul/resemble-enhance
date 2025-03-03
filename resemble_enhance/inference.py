@@ -79,7 +79,6 @@ def merge_chunks(chunks, chunk_length, hop_length, sr=44100, length=None):
     overlap_length = chunk_length - hop_length
     signal = torch.zeros(signal_length, device=chunks[0].device)
 
-    print("Merging chunks on device: ", chunks[0].device)
     fadein = torch.linspace(0, 1, overlap_length, device=chunks[0].device)
     fadein = torch.cat([fadein, torch.ones(hop_length, device=chunks[0].device)])
     fadeout = torch.linspace(1, 0, overlap_length, device=chunks[0].device)
@@ -95,8 +94,6 @@ def merge_chunks(chunks, chunk_length, hop_length, sr=44100, length=None):
         if i > 0:
             pre_region = chunks[i - 1][-overlap_length:]
             cur_region = chunk[:overlap_length]
-            print("Pre region device: ", pre_region.device)
-            print("Cur region device: ", cur_region.device)
             offset = compute_offset(pre_region, cur_region, sr=sr)
             start -= offset
             end -= offset
@@ -143,10 +140,10 @@ def inference(model, dwav, sr, device, chunk_seconds: float = 30.0, overlap_seco
 
     sr = hp.wav_rate
 
-    if torch.cuda.is_available():
-        torch.cuda.synchronize()
+    # if torch.cuda.is_available():
+    #     torch.cuda.synchronize()
 
-    start_time = time.perf_counter()
+    # start_time = time.perf_counter()
 
     chunk_length = int(sr * chunk_seconds)
     overlap_length = int(sr * overlap_seconds)
@@ -158,10 +155,10 @@ def inference(model, dwav, sr, device, chunk_seconds: float = 30.0, overlap_seco
 
     hwav = merge_chunks(chunks, chunk_length, hop_length, sr=sr, length=dwav.shape[-1])
 
-    if torch.cuda.is_available():
-        torch.cuda.synchronize()
+    # if torch.cuda.is_available():
+    #     torch.cuda.synchronize()
 
-    elapsed_time = time.perf_counter() - start_time
-    logger.info(f"Elapsed time: {elapsed_time:.3f} s, {hwav.shape[-1] / elapsed_time / 1000:.3f} kHz")
+    # elapsed_time = time.perf_counter() - start_time
+    # logger.info(f"Elapsed time: {elapsed_time:.3f} s, {hwav.shape[-1] / elapsed_time / 1000:.3f} kHz")
 
     return hwav, sr
