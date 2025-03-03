@@ -16,7 +16,7 @@ def load_denoiser(run_dir, device):
     hp = HParams.load(run_dir)
     denoiser = Denoiser(hp)
     path = run_dir / "ds" / "G" / "default" / "mp_rank_00_model_states.pt"
-    state_dict = torch.load(path, map_location="cpu")["module"]
+    state_dict = torch.load(path)["module"]
     denoiser.load_state_dict(state_dict)
     denoiser.eval()
     denoiser.to(device)

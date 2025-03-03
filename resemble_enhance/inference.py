@@ -25,7 +25,7 @@ def inference_chunk(model, dwav, sr, device, npad=441):
     dwav = dwav.to(device)
     dwav = dwav / abs_max  # Normalize
     dwav = F.pad(dwav, (0, npad))
-    hwav = model(dwav[None])[0].cpu()  # (T,)
+    hwav = model(dwav[None])[0] #.cpu()  # (T,)
     hwav = hwav[:length]  # Trim padding
     hwav = hwav * abs_max  # Unnormalize
 
@@ -124,16 +124,17 @@ def inference(model, dwav, sr, device, chunk_seconds: float = 30.0, overlap_seco
     remove_weight_norm_recursively(model)
 
     hp: HParams = model.hp
-
-    dwav = resample(
-        dwav,
-        orig_freq=sr,
-        new_freq=hp.wav_rate,
-        lowpass_filter_width=64,
-        rolloff=0.9475937167399596,
-        resampling_method="sinc_interp_kaiser",
-        beta=14.769656459379492,
-    )
+    if sr != hp.wav_rate:
+        logger.info(f"Resampling from {sr} Hz to {hp.wav_rate} Hz")
+        dwav = resample(
+            dwav,
+            orig_freq=sr,
+            new_freq=hp.wav_rate,
+            lowpass_filter_width=64,
+            rolloff=0.9475937167399596,
+            resampling_method="sinc_interp_kaiser",
+            beta=14.769656459379492,
+        )
 
     del sr  # Everything is in hp.wav_rate now
 
