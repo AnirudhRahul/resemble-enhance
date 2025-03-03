@@ -56,8 +56,7 @@ def compute_offset(chunk1, chunk2, sr=44100):
         n_mels=80,
         f_min=0.0,
         f_max=sr // 2,
-        device=chunk1.device,
-    )
+    ).to(chunk1.device)
 
     spec1 = mel_fn(chunk1).log1p()
     spec2 = mel_fn(chunk2).log1p()
