@@ -79,6 +79,7 @@ def merge_chunks(chunks, chunk_length, hop_length, sr=44100, length=None):
     overlap_length = chunk_length - hop_length
     signal = torch.zeros(signal_length, device=chunks[0].device)
 
+    print("Merging chunks on device: ", chunks[0].device)
     fadein = torch.linspace(0, 1, overlap_length, device=chunks[0].device)
     fadein = torch.cat([fadein, torch.ones(hop_length, device=chunks[0].device)])
     fadeout = torch.linspace(1, 0, overlap_length, device=chunks[0].device)
@@ -94,6 +95,8 @@ def merge_chunks(chunks, chunk_length, hop_length, sr=44100, length=None):
         if i > 0:
             pre_region = chunks[i - 1][-overlap_length:]
             cur_region = chunk[:overlap_length]
+            print("Pre region device: ", pre_region.device)
+            print("Cur region device: ", cur_region.device)
             offset = compute_offset(pre_region, cur_region, sr=sr)
             start -= offset
             end -= offset
