@@ -10,7 +10,7 @@ from deepspeed.runtime.engine import DeepSpeedEngine
 from deepspeed.runtime.utils import clip_grad_norm_
 from torch import nn
 
-from . import distributed
+from .distributed import fix_unset_envs
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,8 @@ def update_deepspeed_logger():
 @cache
 def init_distributed():
     update_deepspeed_logger()
-    distributed.init_distributed(backend="deepspeed")
+    fix_unset_envs()
+    deepspeed.init_distributed(get_accelerator().communication_backend_name())
 
 
 def _try_each(*fns, e=None):

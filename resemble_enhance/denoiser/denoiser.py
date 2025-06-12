@@ -7,7 +7,6 @@ from torch import Tensor, nn
 from ..melspec import MelSpectrogram
 from .hparams import HParams
 from .unet import UNet
-from .convtasnet import ConvTasNet
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +32,7 @@ class Denoiser(nn.Module):
     def __init__(self, hp: HParams):
         super().__init__()
         self.hp = hp
-        if hp.arch == "unet":
-            self.net = UNet(input_dim=3, output_dim=3)
-        elif hp.arch == "convtasnet":
-            self.net = ConvTasNet()
-        else:
-            raise ValueError(f"Unknown architecture: {hp.arch}")
+        self.net = UNet(input_dim=3, output_dim=3)
         self.mel_fn = MelSpectrogram(hp)
 
         self.dummy: Tensor
@@ -172,15 +166,14 @@ class Denoiser(nn.Module):
             y = y.to(self.dummy)
             y = _normalize(y)
 
-        if self.hp.arch == "unet":
-            mag, cos, sin = self._stft(x)  # (b 2f t)
-            mag_mask, sin_res, cos_res = self._predict(mag, cos, sin)
-            sep_mag, sep_cos, sep_sin = self._separate(mag, cos, sin, mag_mask, cos_res, sin_res)
-            o = self._istft(sep_mag, sep_cos, sep_sin)
-            npad = x.shape[-1] - o.shape[-1]
-            o = F.pad(o, (0, npad))
-        else:
-            o = self.net(x)
+        mag, cos, sin = self._stft(x)  # (b 2f t)
+        mag_mask, sin_res, cos_res = self._predict(mag, cos, sin)
+        sep_mag, sep_cos, sep_sin = self._separate(mag, cos, sin, mag_mask, cos_res, sin_res)
+
+        o = self._istft(sep_mag, sep_cos, sep_sin)
+
+        npad = x.shape[-1] - o.shape[-1]
+        o = F.pad(o, (0, npad))
 
         if y is not None:
             self.losses = dict(l1=F.l1_loss(o, y))

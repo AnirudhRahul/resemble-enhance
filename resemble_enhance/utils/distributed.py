@@ -29,22 +29,10 @@ def fix_unset_envs():
 
 
 @cache
-def init_distributed(backend: str = "deepspeed"):
-    """Initialize the distributed environment.
-
-    Args:
-        backend: ``"deepspeed"`` to use DeepSpeed initialization or ``"ddp"``
-            for PyTorch DDP.
-    """
+def init_distributed():
     fix_unset_envs()
-    if backend == "ddp":
-        torch.distributed.init_process_group(
-            backend=get_accelerator().communication_backend_name()
-        )
-    else:
-        deepspeed.init_distributed(get_accelerator().communication_backend_name())
-    if torch.cuda.is_available():
-        torch.cuda.set_device(local_rank())
+    deepspeed.init_distributed(get_accelerator().communication_backend_name())
+    torch.cuda.set_device(local_rank())
 
 
 def local_rank():
