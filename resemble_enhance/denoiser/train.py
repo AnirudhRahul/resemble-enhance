@@ -5,12 +5,14 @@ from pathlib import Path
 
 import soundfile
 import torch
+from dataclasses import replace
 from deepspeed import DeepSpeedConfig
 from torch import Tensor
 from tqdm import tqdm
 
 from ..data import create_dataloaders, mix_fg_bg
 from ..utils import Engine, TrainLoop, save_mels, setup_logging, tree_map
+from ..utils.ddp_engine import Engine as DDPEngine
 from ..utils.distributed import is_local_leader
 from .denoiser import Denoiser
 from .hparams import HParams
@@ -21,7 +23,10 @@ def load_G(run_dir: Path, hp: HParams | None = None, training=True):
         hp = HParams.load(run_dir)
     assert isinstance(hp, HParams)
     model = Denoiser(hp)
-    engine = Engine(model=model, config_class=DeepSpeedConfig(hp.deepspeed_config), ckpt_dir=run_dir / "ds" / "G")
+    if hp.use_ddp:
+        engine = DDPEngine(model=model, hp=hp, ckpt_dir=run_dir / "ddp" / "G")
+    else:
+        engine = Engine(model=model, config_class=DeepSpeedConfig(hp.deepspeed_config), ckpt_dir=run_dir / "ds" / "G")
     if training:
         engine.load_checkpoint()
     else:
@@ -39,10 +44,16 @@ def main():
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--yaml", type=Path, default=None)
     parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--arch", choices=["unet", "convtasnet"], default=None)
+    parser.add_argument("--ddp", action="store_true")
     args = parser.parse_args()
 
     setup_logging(args.run_dir)
     hp = HParams.load(args.run_dir, yaml=args.yaml)
+    if args.arch is not None:
+        hp = replace(hp, arch=args.arch)
+    if args.ddp:
+        hp = replace(hp, use_ddp=True)
 
     if is_local_leader():
         hp.save_if_not_exists(args.run_dir)
