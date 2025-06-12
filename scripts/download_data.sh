@@ -8,7 +8,8 @@
 #   --librispeech  Download the Librispeech corpus
 #   --daps         Download the DAPS corpus
 #   --vctk         Download the VCTK corpus
-#   data_dir: directory to store datasets (default: data)
+#   -h, --help     Show this message
+#   data_dir       Directory to store datasets (default: data)
 #
 # If no dataset flags are given, all datasets are downloaded.
 #
@@ -16,6 +17,21 @@
 # into foreground (clean speech) and background noise folders.
 
 set -euo pipefail
+
+function usage() {
+    cat <<EOF
+Usage: $0 [options] [data_dir]
+  --dnsmos       Download the DNSMOS dataset
+  --voicebank    Download the VoiceBank+DEMAND corpus
+  --librispeech  Download the Librispeech corpus
+  --daps         Download the DAPS corpus
+  --vctk         Download the VCTK corpus
+  -h, --help     Show this help message
+  data_dir       Directory to store datasets (default: data)
+
+If no dataset flags are given, all datasets are downloaded.
+EOF
+}
 
 DATA_DIR=data
 declare -a DATASETS=()
@@ -25,6 +41,15 @@ while [[ $# -gt 0 ]]; do
         --dnsmos|--voicebank|--librispeech|--daps|--vctk)
             DATASETS+=("${1#--}")
             shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            usage
+            exit 1
             ;;
         *)
             DATA_DIR=$1
@@ -43,12 +68,21 @@ RIR_DIR="$DATA_DIR/rir"
 
 mkdir -p "$FG_DIR/en" "$BG_DIR/en" "$RIR_DIR" "$DATA_DIR/raw"
 
+function check_url() {
+    url=$1
+    if ! wget --spider "$url" > /dev/null 2>&1; then
+        echo "Failed to access $url" >&2
+        return 1
+    fi
+}
+
 function download_and_extract() {
     url=$1
     dest=$2
     mkdir -p "$dest"
     fname=$(basename "$url")
     if [ ! -f "$dest/$fname" ]; then
+        check_url "$url"
         wget -c "$url" -O "$dest/$fname"
     fi
     case "$fname" in
@@ -68,7 +102,7 @@ function copy_wavs() {
 
 
 function download_dnsmos() {
-    DNSMOS_URL="https://example.com/dnsmos_dataset_48k.tar.gz" # placeholder URL
+    DNSMOS_URL="https://github.com/microsoft/DNS-Challenge/raw/master/Datasets/DNSMOS/DNSMOS_dataset_48K.tar.gz"
     if [ ! -d "$DATA_DIR/raw/dnsmos" ]; then
         download_and_extract "$DNSMOS_URL" "$DATA_DIR/raw/dnsmos"
     fi

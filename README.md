@@ -52,9 +52,11 @@ python app.py
 You need to prepare a foreground speech dataset and a background non-speech dataset. In addition, you can optionally provide the [WHAM! noise dataset](https://github.com/wham-team/wham) for extra noise augmentation and a RIR dataset ([examples](https://github.com/RoyJames/room-impulse-responses)).
 The `scripts/download_data.sh` script can automatically download several public
 datasets (VoiceBank+DEMAND, Librispeech, VCTK, DNSMOS, and DAPS) and organize
-them into the following folder structure. You can pass flags such as `--dnsmos`,
-`--voicebank`, or `--librispeech` to download specific datasets. If no flags are
-given, all are downloaded:
+them into the following folder structure. Run `./scripts/download_data.sh -h` to
+see all options. You can pass flags such as `--dnsmos`, `--voicebank`, or
+`--librispeech` to download specific datasets. If no flags are given, all are
+downloaded. The script checks each URL before downloading and will report an
+error if any dataset cannot be reached:
 
 
 ```bash
