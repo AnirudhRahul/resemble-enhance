@@ -55,8 +55,8 @@ datasets (VoiceBank+DEMAND, Librispeech, VCTK, DNSMOS, and DAPS) and organize
 them into the following folder structure. Run `./scripts/download_data.sh -h` to
 see all options. You can pass flags such as `--dnsmos`, `--voicebank`, or
 `--librispeech` to download specific datasets. If no flags are given, all are
-downloaded. The script checks each URL before downloading and will report an
-error if any dataset cannot be reached:
+downloaded. The script attempts to verify each URL before downloading and will
+gracefully skip any dataset that cannot be reached:
 
 
 ```bash
