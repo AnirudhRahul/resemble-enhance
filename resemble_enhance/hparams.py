@@ -38,14 +38,6 @@ class HParams:
     fg_dir: Path = Path("data/fg")
     bg_dir: Path = Path("data/bg")
     rir_dir: Path = Path("data/rir")
-    wham_noise_dir: Path | None = None
-    enable_rir: bool = True
-    enable_reverb: bool = True
-    enable_gaussian_noise: bool = True
-    enable_wham_noise: bool = False
-    enable_overdrive: bool = True
-    enable_equalizer: bool = True
-    enable_filters: bool = True
     load_fg_only: bool = False
     praat_augment_prob: float = 0
 
@@ -68,8 +60,6 @@ class HParams:
     warmup_steps: int = 1000
     max_steps: int = 1_000_000
     gradient_clipping: float = 1.0
-    arch: str = "unet"  # network architecture: "unet" or "convtasnet"
-    use_ddp: bool = False  # use PyTorch DDP instead of DeepSpeed
 
     @property
     def deepspeed_config(self):

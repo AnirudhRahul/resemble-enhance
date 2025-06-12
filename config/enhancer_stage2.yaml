@@ -6,5 +6,3 @@ lcfm_z_scale: 6
 praat_augment_prob: 0.2
 denoiser_run_dir: runs/denoiser
 enhancer_stage1_run_dir: runs/enhancer_stage1
-wham_noise_dir: data/wham_noise
-enable_wham_noise: true

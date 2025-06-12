@@ -49,13 +49,7 @@ python app.py
 
 ### Data Preparation
 
-You need to prepare a foreground speech dataset and a background non-speech dataset. In addition, you can optionally provide the [WHAM! noise dataset](https://github.com/wham-team/wham) for extra noise augmentation and a RIR dataset ([examples](https://github.com/RoyJames/room-impulse-responses)).
-The `scripts/download_data.sh` script can automatically download several public
-datasets (VoiceBank+DEMAND, Librispeech, VCTK, DNSMOS, and DAPS) and organize
-them into the following folder structure. You can pass flags such as `--dnsmos`,
-`--voicebank`, or `--librispeech` to download specific datasets. If no flags are
-given, all are downloaded:
-
+You need to prepare a foreground speech dataset and a background non-speech dataset. In addition, you need to prepare a RIR dataset ([examples](https://github.com/RoyJames/room-impulse-responses)).
 
 ```bash
 data
@@ -65,20 +59,10 @@ data
 ├── bg
 │   ├── 00001.wav
 │   └── ...
-├── wham_noise
-│   ├── noise1.wav
-│   └── ...
 └── rir
-    ├── 00001.npy
-    └── ...
+    ├── 00001.npy
+    └── ...
 ```
-
-Run `./scripts/download_data.sh` to download and organize the datasets in
-this structure. You may then point `fg_dir` and `bg_dir` in the configuration
-files to the desired subfolders.
-The script requires `wget` and `unzip` to be installed.
-
-The augmentation pipeline (RIR, reverb, WHAM! noise, etc.) can be controlled with flags such as `enable_rir`, `enable_reverb`, `enable_wham_noise`, and more in the YAML config files.
 
 ### Training
 
