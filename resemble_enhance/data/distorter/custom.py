@@ -83,3 +83,46 @@ class RandomGaussianNoise(Effect):
         noise = noise * np.sqrt(wav_energy / noise_energy)
         alpha = random.uniform(*self.alpha_range)
         return wav * alpha + noise * (1 - alpha)
+
+
+class RandomWhamNoise(Effect):
+    def __init__(self, noise_dir: Path | None, deterministic: bool = False, alpha_range=(0.8, 1.0)):
+        super().__init__()
+        self.noise_dir = noise_dir
+        self.alpha_range = alpha_range
+        self.deterministic = deterministic
+
+    @cached_property
+    def noise_paths(self):
+        if self.noise_dir is None:
+            return []
+        return list(walk_paths(self.noise_dir, ".wav"))
+
+    def _sample_noise(self):
+        if len(self.noise_paths) == 0:
+            return None, None
+        path = self.noise_paths[0] if self.deterministic else random.choice(self.noise_paths)
+        wav, sr = librosa.load(path, sr=None, mono=True)
+        return wav.astype(np.float32), sr
+
+    def apply(self, wav, sr):
+        if len(self.noise_paths) == 0:
+            return wav
+        noise, nsr = self._sample_noise()
+        if noise is None:
+            return wav
+        if nsr != sr:
+            noise = librosa.resample(noise, orig_sr=nsr, target_sr=sr, res_type="kaiser_fast")
+        if len(noise) < len(wav):
+            start = 0 if self.deterministic else random.randint(0, len(wav) - len(noise))
+            padded = np.zeros(len(wav), dtype=np.float32)
+            padded[start : start + len(noise)] = noise
+            noise = padded
+        elif len(noise) > len(wav):
+            start = 0 if self.deterministic else random.randint(0, len(noise) - len(wav))
+            noise = noise[start : start + len(wav)]
+        noise_energy = np.sum(noise**2) + 1e-7
+        wav_energy = np.sum(wav**2) + 1e-7
+        noise = noise * np.sqrt(wav_energy / noise_energy)
+        alpha = random.uniform(*self.alpha_range)
+        return wav * alpha + noise * (1 - alpha)
