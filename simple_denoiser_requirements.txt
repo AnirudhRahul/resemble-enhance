@@ -1,0 +1,21 @@
+# Additional requirements for simple_denoiser_train.py
+# These are in addition to the existing requirements.txt
+
+# Core ML libraries
+torch>=1.13.0
+torchaudio>=0.13.0
+numpy>=1.21.0
+
+# Audio processing
+librosa>=0.10.0  # Updated for better 48kHz resampling
+soundfile>=0.12.0  # For loading audio files
+pesq>=0.0.4
+pystoi>=0.3.3
+
+# Training and logging
+wandb>=0.13.0
+tqdm>=4.64.0
+
+# Utilities
+omegaconf>=2.2.0
+rich>=12.0.0 

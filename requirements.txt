@@ -15,3 +15,7 @@ tqdm>=4.66.1
 resampy>=0.4.2
 tabulate
 gradio>=4.8.0
+unidecode
+wandb
+aiohttp
+aiofiles
