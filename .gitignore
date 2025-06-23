@@ -8,3 +8,5 @@
 version.py
 __pycache__
 model_repo
+train_dataset
+wandb
