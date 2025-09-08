@@ -1,7 +1,7 @@
 import logging
 import random
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 
 from ..hparams import HParams
 from .dataset import Dataset
@@ -29,10 +29,17 @@ def _create_datasets(hp: HParams, mode, val_size=10, seed=123):
 def create_dataloaders(hp: HParams, mode):
     train_ds, val_ds = _create_datasets(hp=hp, mode=mode)
 
+    if hp.use_ddp:
+        train_sampler = DistributedSampler(train_ds)
+        val_sampler = DistributedSampler(val_ds, shuffle=False)
+    else:
+        train_sampler = val_sampler = None
+
     train_dl = DataLoader(
         train_ds,
         batch_size=hp.batch_size_per_gpu,
-        shuffle=True,
+        shuffle=(train_sampler is None),
+        sampler=train_sampler,
         num_workers=hp.nj,
         drop_last=True,
         collate_fn=train_ds.collate_fn,
@@ -41,6 +48,7 @@ def create_dataloaders(hp: HParams, mode):
         val_ds,
         batch_size=1,
         shuffle=False,
+        sampler=val_sampler,
         num_workers=hp.nj,
         drop_last=False,
         collate_fn=val_ds.collate_fn,

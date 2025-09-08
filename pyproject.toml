@@ -4,3 +4,29 @@ target-version = ['py310']
 
 [tool.isort]
 line_length = 120
+
+[project]
+name = "resemble-enhance"
+version = "0.1.0"
+description = "Enhance, denoise, and restore speech."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Resemble AI", email = "brian@resemble.ai" },
+]
+dependencies = [
+    "torch",
+    "torchaudio",
+    "numpy",
+    "scipy",
+    "pyyaml",
+    "torch-ema",
+    "einops",
+    "requests",
+    "tqdm",
+]
+
+[project.scripts]
+resemble-enhance = "resemble_enhance.enhancer.__main__:main"
+resemble-denoise = "resemble_enhance.denoiser.__main__:main"

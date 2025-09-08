@@ -49,20 +49,56 @@ python app.py
 
 ### Data Preparation
 
-You need to prepare a foreground speech dataset and a background non-speech dataset. In addition, you need to prepare a RIR dataset ([examples](https://github.com/RoyJames/room-impulse-responses)).
+You need to prepare a foreground speech dataset and a background non-speech dataset. In addition, you can optionally provide the [WHAM! noise dataset](https://github.com/wham-team/wham) for extra noise augmentation and a RIR dataset ([examples](https://github.com/RoyJames/room-impulse-responses)).
+The `scripts/download_data.py` script can automatically download several public
+datasets and organize them. Run `python scripts/download_data.py --help` to
+see all options. You can pass flags for specific datasets (e.g., `--vctk`,
+`--dns-challenge`). If no flags are provided, all available datasets will be
+downloaded.
+
+The script will download and place the files into the following structure:
 
 ```bash
-data
-├── fg
-│   ├── 00001.wav
-│   └── ...
-├── bg
-│   ├── 00001.wav
-│   └── ...
+train_dataset
+├── fg/en
+│   └── ... .wav
+├── bg/en
+│   └── ... .wav
 └── rir
-    ├── 00001.npy
-    └── ...
+    └── ... .wav
 ```
+
+All audio files are downloaded as `.wav` files. Here is a breakdown of the downloaded datasets and where their files are placed:
+
+- **Foreground (clean speech) files (`train_dataset/fg/en`):**
+  - **DNS Challenge:** VocalSet and VCTK subsets.
+  - **Voicebank:** Clean training set.
+  - **LibriSpeech:** `train-clean-100` subset.
+  - **DAPS:** The DAPS dataset.
+  - **VCTK:** The VCTK corpus.
+- **Background (noise) files (`train_dataset/bg/en`):**
+  - **DNS Challenge:** Audioset and Freesound subsets.
+  - **Voicebank:** Noisy training set (used here as background noise).
+  - **RIR-NOISE:** Point-source noises.
+- **Room Impulse Responses (`train_dataset/rir`):**
+  - **DNS Challenge:** Impulse responses subset.
+  - **RIR-NOISE:** Real RIRs from the Isotropic Noises subset.
+
+To get started, first install the required packages. We recommend using a
+virtual environment (e.g., conda or venv) to manage dependencies.
+
+```bash
+pip install -e .
+```
+
+Then, download the training data. This will download several speech and
+noise datasets to the `train_dataset/` directory.
+
+```bash
+python scripts/download_data.py
+```
+
+The augmentation pipeline (RIR, reverb, WHAM! noise, etc.) can be controlled with flags such as `enable_rir`, `enable_reverb`, `enable_wham_noise`, and more in the YAML config files.
 
 ### Training
 

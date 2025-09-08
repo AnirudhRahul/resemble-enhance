@@ -1,2 +1,4 @@
 batch_size_per_gpu: 32
 training_seconds: 3.0
+wham_noise_dir: data/wham_noise
+enable_wham_noise: true
